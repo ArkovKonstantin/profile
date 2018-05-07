@@ -1,4 +1,5 @@
 import time
+import types
 
 
 class timer:
@@ -13,28 +14,28 @@ class timer:
         print(self.desc, 'finished in', time.clock() - self.start, 's')
 
 
-def decorator(fn):
-    def wrap(*args):
-        with timer(str(fn).split(' ')[1]):
-            fn(*args)
+def profile(obj):
+    def wrap_fun(fn):
+        def fun(*args):
+            with timer(str(fn).split(' ')[1]):
+                output = fn(*args)
+            return output
 
-    return wrap
+        return fun
 
-
-def profile(decorator):
-    def decorate(cls):
-        if str(type(cls)) == "<class 'function'>":
-            cls = decorator(cls)
-        else:
-            for attr in cls.__dict__:
-                if callable(getattr(cls, attr)):
-                    setattr(cls, attr, decorator(getattr(cls, attr)))
+    def wrap_class(cls):
+        for attr in cls.__dict__:
+            if callable(getattr(cls, attr)):
+                setattr(cls, attr, wrap_fun(getattr(cls, attr)))
         return cls
 
-    return decorate
+    if type(obj) is types.FunctionType:
+        return wrap_fun(obj)
+    else:
+        return wrap_class(obj)
 
 
-@profile(decorator)
+@profile
 class Foo:
     def __init__(self):
         pass
@@ -46,7 +47,7 @@ class Foo:
         return 2
 
 
-@profile(decorator)
+@profile
 def fun_a():
     return 3
 
@@ -55,4 +56,4 @@ fun_a()
 f = Foo()
 f.method_a()
 
-# f.method_b()
+f.method_b()
