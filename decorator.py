@@ -1,5 +1,6 @@
 import time
 import types
+from functools import wraps
 
 
 class timer:
@@ -16,6 +17,7 @@ class timer:
 
 def profile(obj):
     def wrap_fun(fn):
+        @wraps(fn)
         def fun(*args):
             with timer(str(fn).split(' ')[1]):
                 output = fn(*args)
