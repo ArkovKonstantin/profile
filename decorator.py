@@ -19,7 +19,7 @@ def profile(obj):
     def wrap_fun(fn):
         @wraps(fn)
         def fun(*args):
-            with timer(str(fn).split(' ')[1]):
+            with timer(fn.__name__):
                 output = fn(*args)
             return output
 
